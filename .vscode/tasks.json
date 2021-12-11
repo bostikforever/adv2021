@@ -1,0 +1,45 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "process",
+            "label": "Compile D",
+            "command": "ldmd2",
+            "args": [
+                "-de",
+                "-w",
+                "-O",
+                "-release",
+                "-od=${workspaceFolder}/build/obj/",
+                "-of=${workspaceFolder}/build/${fileBasenameNoExtension}",
+                "${workspaceFolder}/src/${fileBasename}",
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Run D",
+            "command": "FILE=${fileBasename} && export INPUT=${FILE%%_*} && echo $INPUT && ${workspaceFolder}/build/${fileBasenameNoExtension} ${workspaceFolder}/input/$INPUT.in",
+            "dependsOn": [
+                "Compile D"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "rdmD",
+            "command": "FILE=${fileBasename} && export INPUT=${FILE%%_*} && echo $INPUT && rdmd -de -w -O -release -od=${workspaceFolder}/build/obj/ -of=${workspaceFolder}/build/${fileBasenameNoExtension} ${workspaceFolder}/src/${fileBasename} ${workspaceFolder}/input/$INPUT.in",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+    ]
+}

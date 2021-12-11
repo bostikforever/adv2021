@@ -1,0 +1,37 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "process",
+            "label": "Compile D",
+            "command": "ldmd2",
+            "args": [
+                "-de",
+                "-w",
+                "-O",
+                "--release",
+                "${workspaceFolder}/src/${fileBasename}",
+                "-od",
+                "${workspaceFolder}/build/obj/",
+                "-of",
+                "${workspaceFolder}/build/${fileBasenameNoExtension}"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Run D",
+            "command": "FILE=${fileBasename} && export INPUT=${FILE%%_*} && echo $INPUT && ${workspaceFolder}/build/${fileBasenameNoExtension} ${workspaceFolder}/input/$INPUT.in",
+            "dependsOn": [
+                "Compile D"
+            ],
+            "problemMatcher": []
+        }
+    ]
+}

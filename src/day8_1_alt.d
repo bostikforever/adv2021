@@ -47,7 +47,7 @@ construct binary system from the digits
  
  +/
 
-auto deduceImpl(S, R)(S output, R bd, R cf, R eg)
+auto decodeOutput(S, R)(S output, R bd, R cf, R eg)
 {
     import std.algorithm : count, setIntersection, sort;
     import std.array : array;
@@ -87,23 +87,22 @@ auto deduceImpl(S, R)(S output, R bd, R cf, R eg)
     }
 }
 
-auto deduce(RoR)(RoR inOut)
+auto deduceInput(R)(R input)
 {
     import std.algorithm : map, multiwayUnion, setDifference, sort;
     import std.array : array;
-    import std.conv : to;
+    import std.typecons : Tuple;
 
-    auto inOutArr = inOut.array;
-    auto input = inOutArr[0];
+    alias DecodeState = Tuple!(dchar[], "bd", dchar[], "cf", dchar[], "eg");
+    DecodeState ret;
 
-    dchar[] cf, bd, eg;
     dchar[] four, seven, eight;
     foreach (digit; input)
     {
         switch (digit.length)
         {
         case 2:
-            cf = digit.array.sort.release;
+            ret.cf = digit.array.sort.release;
             continue;
         case 3:
             seven = digit.array.sort.release;
@@ -118,12 +117,22 @@ auto deduce(RoR)(RoR inOut)
             continue;
         }
     }
+    ret.bd = four.setDifference(ret.cf).array;
+    ret.eg = eight.setDifference(multiwayUnion([seven, four])).array;
+    return ret;
+}
 
-    bd = four.setDifference(cf).array;
-    eg = eight.setDifference(multiwayUnion([seven, four])).array;
+auto deduceInDecodeOut(RoR)(RoR inOut)
+{
+    import std.algorithm : map;
+    import std.conv : to;
 
-    auto output = inOutArr[1];
-    return output.map!(x => x.deduceImpl(bd, cf, eg))
+    auto input = inOut.front();
+    inOut.popFront();
+    auto decodeState = deduceInput(input);
+
+    auto output = inOut.front();
+    return output.map!(x => x.decodeOutput(decodeState.bd, decodeState.cf, decodeState.eg))
         .to!int;
 }
 
@@ -131,7 +140,7 @@ auto solve(R)(R range)
 {
     import std.algorithm : map, sum;
 
-    return range.map!deduce.sum;
+    return range.map!deduceInDecodeOut.sum;
 }
 
 int main(string[] argv)
